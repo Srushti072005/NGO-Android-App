@@ -1,0 +1,482 @@
+# NGO Android App - "Hope Foundation"
+
+## Project Structure
+```
+app/
+├── src/main/
+│   ├── java/com/example/hopefoundation/
+│   │   ├── MainActivity.kt
+│   │   ├── FormActivity.kt
+│   │   ├── AboutActivity.kt
+│   │   └── Volunteer.kt
+│   ├── res/
+│   │   ├── layout/
+│   │   │   ├── activity_main.xml
+│   │   │   ├── activity_form.xml
+│   │   │   └── activity_about.xml
+│   │   ├── values/
+│   │   │   ├── strings.xml
+│   │   │   └── colors.xml
+│   │   └── drawable/
+│   └── AndroidManifest.xml
+└── build.gradle (Module: app)
+```
+
+## 1. MainActivity.kt (Home Screen)
+```kotlin
+package com.example.hopefoundation
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val volunteerButton = findViewById<Button>(R.id.btn_volunteer)
+        val aboutButton = findViewById<Button>(R.id.btn_about)
+
+        volunteerButton.setOnClickListener {
+            val intent = Intent(this, FormActivity::class.java)
+            startActivity(intent)
+        }
+
+        aboutButton.setOnClickListener {
+            val intent = Intent(this, AboutActivity::class.java)
+            startActivity(intent)
+        }
+    }
+}
+```
+
+## 2. FormActivity.kt (Volunteer Registration)
+```kotlin
+package com.example.hopefoundation
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class FormActivity : AppCompatActivity() {
+    private lateinit var etName: EditText
+    private lateinit var etContact: EditText
+    private lateinit var etCity: EditText
+    private lateinit var btnSubmit: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_form)
+
+        initViews()
+        setupSubmitButton()
+    }
+
+    private fun initViews() {
+        etName = findViewById(R.id.et_name)
+        etContact = findViewById(R.id.et_contact)
+        etCity = findViewById(R.id.et_city)
+        btnSubmit = findViewById(R.id.btn_submit)
+    }
+
+    private fun setupSubmitButton() {
+        btnSubmit.setOnClickListener {
+            val name = etName.text.toString().trim()
+            val contact = etContact.text.toString().trim()
+            val city = etCity.text.toString().trim()
+
+            if (validateForm(name, contact, city)) {
+                val volunteer = Volunteer(name, contact, city)
+                // In a real app, you would save this to a database
+                Toast.makeText(this, "Thank you for volunteering, $name!", Toast.LENGTH_LONG).show()
+                finish() // Return to main activity
+            }
+        }
+    }
+
+    private fun validateForm(name: String, contact: String, city: String): Boolean {
+        when {
+            name.isEmpty() -> {
+                etName.error = "Name is required"
+                return false
+            }
+            contact.isEmpty() -> {
+                etContact.error = "Contact is required"
+                return false
+            }
+            city.isEmpty() -> {
+                etCity.error = "City is required"
+                return false
+            }
+            contact.length < 10 -> {
+                etContact.error = "Please enter a valid contact number"
+                return false
+            }
+        }
+        return true
+    }
+}
+```
+
+## 3. AboutActivity.kt
+```kotlin
+package com.example.hopefoundation
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+
+class AboutActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_about)
+    }
+}
+```
+
+## 4. Volunteer.kt (Data Class)
+```kotlin
+package com.example.hopefoundation
+
+data class Volunteer(
+    val name: String,
+    val contact: String,
+    val city: String
+)
+```
+
+## 5. activity_main.xml (Home Screen Layout)
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center"
+    android:background="@color/background_light">
+
+    <!-- Logo Placeholder -->
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginBottom="24dp"
+        android:background="@color/primary_color"
+        android:contentDescription="Hope Foundation Logo" />
+
+    <!-- NGO Name -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ngo_name"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_color"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Mission Statement -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/mission_statement"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="32dp"
+        android:lineSpacingExtra="4dp"
+        android:textColor="@color/text_secondary" />
+
+    <!-- Volunteer Button -->
+    <Button
+        android:id="@+id/btn_volunteer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/become_volunteer"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/primary_color"
+        android:textColor="@android:color/white"
+        android:padding="16dp" />
+
+    <!-- About Us Button -->
+    <Button
+        android:id="@+id/btn_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_us"
+        android:textSize="18sp"
+        android:backgroundTint="@color/secondary_color"
+        android:textColor="@android:color/white"
+        android:padding="16dp" />
+
+</LinearLayout>
+```
+
+## 6. activity_form.xml (Volunteer Form Layout)
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/volunteer_registration"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Name Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/et_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/full_name"
+                android:inputType="textPersonName"
+                android:padding="16dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Contact Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/et_contact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/contact_number"
+                android:inputType="phone"
+                android:padding="16dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- City Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp">
+
+            <EditText
+                android:id="@+id/et_city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/city"
+                android:inputType="textCapWords"
+                android:padding="16dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/btn_submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:textSize="18sp"
+            android:backgroundTint="@color/primary_color"
+            android:textColor="@android:color/white"
+            android:padding="16dp" />
+
+    </LinearLayout>
+</ScrollView>
+```
+
+## 7. activity_about.xml (About Us Layout)
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_us"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- About Content -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/about_content"
+            android:textSize="16sp"
+            android:lineSpacingExtra="6dp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Vision -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/our_vision"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/vision_content"
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Contact Info -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_us"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_info"
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/text_primary" />
+
+    </LinearLayout>
+</ScrollView>
+```
+
+## 8. strings.xml
+```xml
+<resources>
+    <string name="app_name">Hope Foundation</string>
+    <string name="ngo_name">Hope Foundation</string>
+    <string name="mission_statement">Empowering communities through education, healthcare, and sustainable development. Together, we build a better tomorrow for all.</string>
+    <string name="become_volunteer">Become a Volunteer</string>
+    <string name="about_us">About Us</string>
+    <string name="volunteer_registration">Volunteer Registration</string>
+    <string name="full_name">Full Name</string>
+    <string name="contact_number">Contact Number</string>
+    <string name="city">City</string>
+    <string name="submit">Submit</string>
+    <string name="about_content">Hope Foundation was established in 2015 with a mission to create positive change in underserved communities. We focus on three core areas: education, healthcare, and sustainable development.\n\nOur dedicated team of volunteers and staff work tirelessly to provide quality education to children, essential healthcare services to families, and sustainable livelihood opportunities to adults.\n\nSince our inception, we have impacted over 10,000 lives across 50 communities, built 15 schools, established 5 healthcare centers, and trained 500+ individuals in various skills.</string>
+    <string name="our_vision">Our Vision</string>
+    <string name="vision_content">To create a world where every individual has access to quality education, healthcare, and opportunities for sustainable growth, regardless of their socio-economic background.</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="contact_info">Email: info@hopefoundation.org\nPhone: +91-9876543210\nAddress: 123 Service Street, Community Block, Nagpur, Maharashtra 440001</string>
+</resources>
+```
+
+## 9. colors.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_color">#2E7D32</color>
+    <color name="secondary_color">#1976D2</color>
+    <color name="background_light">#F5F5F5</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+</resources>
+```
+
+## 10. AndroidManifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.hopefoundation">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name=".FormActivity"
+            android:parentActivityName=".MainActivity" />
+            
+        <activity
+            android:name=".AboutActivity"
+            android:parentActivityName=".MainActivity" />
+    </application>
+</manifest>
+```
+
+## 11. build.gradle (Module: app)
+```gradle
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.hopefoundation"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}
+```
+
+ 
